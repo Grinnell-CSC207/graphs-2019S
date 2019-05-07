@@ -179,6 +179,29 @@ public class Graph {
   } // dump(PrintWriter)
 
   /**
+   * Dump the graph in a more useful way.
+   */
+  public void dumpWithNames(PrintWriter pen) {
+    pen.println("Vertices: ");
+    for (int vertex = 0; vertex < vertices.length; vertex++) {
+      String name = vertexName(vertex);
+      if (name != null) {
+        pen.println("  " + name);
+      } // if
+    } // for
+    pen.println("Edges: ");
+    for (int vertex = 0; vertex < vertices.length; vertex++) {
+      if (validVertex(vertex)) {
+        for (Edge e : vertices[vertex]) {
+          pen.println("  " + vertexName(e.from()) + " --" + e.weight() + "-> "
+              + vertexName(e.to()));
+        } // for()
+      } // if
+    } // for
+    pen.println();
+  } // dumpWithNames(PrintWriter)
+
+  /**
    * Get the number of edges.
    */
   public int numEdges() {
