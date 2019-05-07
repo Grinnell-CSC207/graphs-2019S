@@ -176,7 +176,7 @@ public class Graph {
       } // if
     } // for
     pen.println();
-  } // dump()
+  } // dump(PrintWriter)
 
   /**
    * Get the number of edges.
@@ -511,7 +511,10 @@ public class Graph {
    * Unmark a vertex.
    */
   void unmark(int vertex, byte mark) {
+    // This approach makes Charlie uncomfortable. However, the more sensible
+    // thing (commented out below) does not work.
     this.marks[vertex] = (byte) ((this.marks[vertex] | mark) - mark);
+    // this.marks[vertex] |= (byte) ~mark;
   } // unmark(int, byte)
 
   /**
@@ -595,6 +598,5 @@ public class Graph {
     }
     return this.unusedVertices.remove();
   } // newVertexNumber()
-
 
 } // class Graph
