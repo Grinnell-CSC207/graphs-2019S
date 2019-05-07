@@ -38,6 +38,18 @@ public class Graph {
    */
   static final int INITIAL_CAPACITY = 16;
 
+  /**
+   * A few of the valid marks.
+   */
+  static final byte MARK = (byte) 1;
+  static final byte MARK01 = (byte) 1;
+  static final byte MARK02 = (byte) 2;
+  static final byte MARK03 = (byte) 4;
+  static final byte MARK04 = (byte) 8;
+  static final byte MARK05 = (byte) 16;
+  static final byte MARK06 = (byte) 32;
+  static final byte MARK07 = (byte) 64;
+
   // +--------+------------------------------------------------------
   // | Fields |
   // +--------+
@@ -65,12 +77,17 @@ public class Graph {
   String[] vertexNames;
 
   /**
+   * Marks on the vertices.
+   */
+  byte marks[];
+
+  /**
    * The unused vertices
    */
   Queue<Integer> unusedVertices;
 
   /**
-   * The numbers of the vertices. The vertex with name n is in
+   * The numbers of the vertices. The vertex with name n is given by
    * vertexNumbers.get(n).
    */
   HashMap<String, Integer> vertexNumbers;
@@ -99,6 +116,7 @@ public class Graph {
   public Graph(int initialCapacity) {
     this.vertices = (ArrayList<Edge>[]) new ArrayList[initialCapacity];
     this.vertexNames = new String[initialCapacity];
+    this.marks = new byte[initialCapacity];
     this.vertexNumbers = new HashMap<String, Integer>();
     this.unusedVertices = new LinkedList<Integer>();
     this.version = 0;
@@ -129,7 +147,7 @@ public class Graph {
    * corresponding vertex number, returns -1.
    */
   public int vertexNumber(String vertexName) {
-    Integer result = vertexNumbers.get(vertexName);
+    Integer result = this.vertexNumbers.get(vertexName);
     if (result == null) {
       return -1;
     } else {
@@ -337,7 +355,7 @@ public class Graph {
    * @exception Exception if there is already a vertex with that name.
    */
   public int addVertex(String name) throws Exception {
-    if (vertexNumbers.get(name) != null) {
+    if (this.vertexNumber(name) != -1) {
       throw new Exception("Already have a node named " + name);
     } // if
     return addVertex(name, this.newVertexNumber());
@@ -353,7 +371,7 @@ public class Graph {
     String name = "v" + v;
     // On the off chance there is already a vertex with that name,
     // we try some other names.
-    while (this.vertexNumbers.get(name) != null) {
+    while (this.vertexNumber(name) != -1) {
       name = "v" + name;
     } // while
     return addVertex(name, v);
@@ -422,6 +440,101 @@ public class Graph {
     this.removeVertex(this.vertexNumber(vertex));
   } // removeVertex(String)
 
+  // +------------------+--------------------------------------------
+  // | Marking vertices |
+  // +------------------+
+
+  /**
+   * Remove all of the marks.
+   */
+  public void clearMarks() {
+    this.marks = new byte[this.marks.length];
+  } // clearMarks
+
+  /**
+   * Determine if a vertex is marked with a particular mark.
+   */
+  boolean isMarked(int vertex, byte mark) {
+    return (this.marks[vertex] & mark) != 0;
+  } // isMarked(int, byte)
+
+  /**
+   * Determine if a vertex is marked at all.
+   */
+  boolean isMarked(int vertex) {
+    return this.marks[vertex] != 0;
+  } // isMarked(int)
+
+  /**
+   * Determine if a vertex is marked with a particular mark.
+   */
+  boolean isMarked(String vertex, byte mark) {
+    return this.isMarked(this.vertexNumber(vertex), mark);
+  } // isMarked(String, byte)
+
+  /**
+   * Determine if a vertex is marked at all.
+   */
+  boolean isMarked(String vertex) {
+    return this.isMarked(this.vertexNumber(vertex));
+  } // isMarked(String)
+
+  /**
+   * Mark a vertex with one of the seven possible marks.
+   */
+  void mark(int vertex, byte mark) {
+    this.marks[vertex] |= mark;
+  } // mark(int, byte)
+
+  /**
+   * Mark a vertex using the default mark.
+   */
+  void mark(int vertex) {
+    this.mark(vertex, Graph.MARK);
+  } // mark(int)
+
+  /**
+   * Mark a vertex with one of the seven possible marks.
+   */
+  void mark(String vertex, byte mark) {
+    this.mark(this.vertexNumber(vertex), mark);
+  } // mark(String, byte)
+
+  /**
+   * Mark a vertex using the default mark.
+   */
+  void mark(String vertex) {
+    this.mark(this.vertexNumber(vertex));
+  } // mark(String)
+
+  /**
+   * Unmark a vertex.
+   */
+  void unmark(int vertex, byte mark) {
+    this.marks[vertex] = (byte) ((this.marks[vertex] | mark) - mark);
+  } // unmark(int, byte)
+
+  /**
+   * Unmark a vertex.
+   */
+  void unmark(int vertex) {
+    this.marks[vertex] = 0;
+  } // unmark(int)
+
+  /**
+   * Unmark a vertex.
+   */
+  void unmark(String vertex, byte mark) {
+    this.unmark(this.vertexNumber(vertex), mark);
+  } // unmark(String, byte)
+
+  /**
+   * Unmark a vertex.
+   */
+  void unmark(String vertex) {
+    this.unmark(this.vertexNumber(vertex));
+  } // unmark(String)
+
   // +-----------+---------------------------------------------------
   // | Utilities |
   // +-----------+
@@ -446,6 +559,7 @@ public class Graph {
     int oldSize = this.vertices.length;
     int newSize = oldSize * 2;
     this.vertexNames = Arrays.copyOf(this.vertexNames, newSize);
+    this.marks = Arrays.copyOf(this.marks, newSize);
     this.vertices = Arrays.copyOf(this.vertices, newSize);
     for (int i = oldSize; i < newSize; i++) {
       this.vertices[i] = new ArrayList<Edge>();
@@ -481,5 +595,6 @@ public class Graph {
     }
     return this.unusedVertices.remove();
   } // newVertexNumber()
+
 
 } // class Graph
