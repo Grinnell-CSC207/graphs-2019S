@@ -195,12 +195,14 @@ public class Graph {
    */
   public void dumpWithNames(PrintWriter pen) {
     pen.println("Vertices: ");
+    pen.print(" ");
     for (int vertex = 0; vertex < vertices.length; vertex++) {
       String name = vertexName(vertex);
       if (name != null) {
-        pen.println("  " + name);
+        pen.print(" " + name);
       } // if
     } // for
+    pen.println();
     pen.println("Edges: ");
     for (int vertex = 0; vertex < vertices.length; vertex++) {
       if (validVertex(vertex)) {
