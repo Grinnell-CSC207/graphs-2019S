@@ -337,6 +337,55 @@ public class Graph {
   } // edgesFrom(String)
 
   /**
+   * Get a path from start to finish. If no such path exists, returns null.
+   */
+  public List<Edge> path(int start, int finish) {
+    // An array of the edges that lead to vertices. incoming[i]
+    // is an edge that leads to vertex i. This approach is derived
+    // from one by GM and GT.
+    Edge[] incoming = new Edge[vertices.length];
+
+    // Vertices left to process. (We use BFS.)
+    Queue<Integer> remaining = new LinkedList<Integer>();
+    remaining.add(start);
+
+    // Keep going until we reach finish or run out of edges
+    while ((incoming[finish] == null) && (!remaining.isEmpty())) {
+      Integer v = remaining.remove();
+      Iterator<Edge> edges = this.edgesFrom(v);
+      while (edges.hasNext()) {
+        Edge e = edges.next();
+        int to = e.to();
+        if (incoming[to] == null) {
+          remaining.add(to);
+          incoming[to] = e;
+        } // if
+      } // while
+    } // while
+
+    // Return the appropriate list
+    if (incoming[finish] == null) {
+      return null;
+    } else {
+      LinkedList<Edge> path = new LinkedList<Edge>();
+      int current = finish;
+      do {
+        Edge e = incoming[current];
+        path.addFirst(e);
+        current = e.from();
+      } while (current != start);
+      return path;
+    } // if/else
+  } // path(int, int)
+
+  /**
+   * Get a path from start to finish. If no such path exists, returns null.
+   */
+  public List<Edge> path(String start, String finish) {
+    return path(this.vertexNumber(start), this.vertexNumber(finish));
+  } // path(String, String)
+
+  /**
    * Get an iterator for the vertices.
    */
   public Iterator<Integer> vertices() {
@@ -438,8 +487,8 @@ public class Graph {
   } // addVertex()
 
   /**
-   * Read a bunch of edges from a file.  Throws an exception if
-   * any of the lines have the wrong form.
+   * Read a bunch of edges from a file. Throws an exception if any of the lines
+   * have the wrong form.
    */
   public void readEdges(String fname) throws Exception {
     BufferedReader lines = new BufferedReader(new FileReader(fname));
