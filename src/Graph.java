@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -126,6 +129,15 @@ public class Graph {
     } // for
   } // Graph(int)
 
+  /**
+   * Create a new graph, reading the edges from a file. Edges must have the form
+   * FROM TO WEIGHT, with one edge per line.
+   */
+  public Graph(String fName) throws Exception {
+    this();
+    this.readEdges(fName);
+  } // Graph
+
   // +----------------------+----------------------------------------
   // | Vertex names/numbers |
   // +----------------------+
@@ -200,6 +212,29 @@ public class Graph {
     } // for
     pen.println();
   } // dumpWithNames(PrintWriter)
+
+  /**
+   * Save the graph in the form expected by readEdges.
+   */
+  public void save(String fname) throws Exception {
+    PrintWriter file = new PrintWriter(new File(fname));
+    this.write(file);
+    file.close();
+  } // save(String)
+
+  /**
+   * Dump the graph in the form expected by readEdges.
+   */
+  public void write(PrintWriter pen) {
+    for (int vertex = 0; vertex < vertices.length; vertex++) {
+      if (validVertex(vertex)) {
+        for (Edge e : vertices[vertex]) {
+          pen.println(vertexName(e.from()) + " " + vertexName(e.to()) + " "
+              + e.weight());
+        } // for()
+      } // if
+    } // for
+  } // write(PrintWriter)
 
   /**
    * Get the number of edges.
@@ -399,6 +434,32 @@ public class Graph {
     } // while
     return addVertex(name, v);
   } // addVertex()
+
+  /**
+   * Read a bunch of edges from a file.  Throws an exception if
+   * any of the lines have the wrong form.
+   */
+  public void readEdges(String fname) throws Exception {
+    BufferedReader lines = new BufferedReader(new FileReader(fname));
+    // Since the only way to determine if no lines are left in a
+    // BufferedReader is to see if readLine() throws an exception,
+    // we put our loop in a try/catch clause.
+    try {
+      while (true) {
+        String line = lines.readLine();
+        String[] parts = line.split("[\\s*]");
+        if (parts.length == 3) {
+          int from = this.safeVertexNumber(parts[0]);
+          int to = this.safeVertexNumber(parts[1]);
+          int weight = Integer.parseInt(parts[2]);
+          this.addEdge(from, to, weight);
+        } // if
+      } // while
+    } catch (Exception e) {
+
+    } // try/catch
+    lines.close();
+  } // readEdges()
 
   /**
    * Remove an edge. If the edge does not exist, does nothing.
@@ -621,5 +682,17 @@ public class Graph {
     }
     return this.unusedVertices.remove();
   } // newVertexNumber()
+
+  /**
+   * Get a vertex number for a vertex name, even if the name is not already in
+   * the graph.
+   */
+  private int safeVertexNumber(String vertex) throws Exception {
+    int num = this.vertexNumber(vertex);
+    if (num == -1) {
+      num = this.addVertex(vertex);
+    } // if
+    return num;
+  } // safeVertexNumber(String)
 
 } // class Graph
